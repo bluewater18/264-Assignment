@@ -33,6 +33,7 @@ def main():
     CRout.bind(("127.0.0.1",CRoutPort))
     CRout.listen(1) 
     
+    
     CSin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     CSin.setblocking(0)
     CSin.bind(("127.0.0.1",CSinPort))
@@ -49,6 +50,7 @@ def main():
     outList = []
     StoC = None
     RtoC = None
+    CtoR = None
     
     
     while inList:
@@ -57,13 +59,16 @@ def main():
             if s in [CRin, CRout, CSin, CSout]:
                 conn, addr = s.accept()
                 conn.setblocking(0)
-                print(conn)
+                #print(conn)
                 inList.append(conn)
                 if (addr == ("127.0.0.1",SinPort)):
                     StoC = conn
                     print("Set")
                 if (addr == ("127.0.0.1",RinPort)):
                     RtoC = conn
+                if (addr == ("127.0.0.1", 5069)):
+                    print("CtoR")
+                    CtoR = conn
                 #create holder for msg??
                 print("new connection from" + str(addr))
             #The afforementioned sockets [CRin, CRout, CSin, CSout] are no longer useable to distinguish after they have completed connection
@@ -71,7 +76,7 @@ def main():
                 data=s.recv(1024)
                 
                 if data:
-                    print(s)
+                    #print(s)
                     #temp = pickle.loads(data)
                     #temp.printPacket()                    
                     if s is CRin:
@@ -82,9 +87,9 @@ def main():
                         print("CSin")
                         temp = pickle.loads(data)#error when packet is not send i.e. at the end
                         #if(not introduceErrors(data)):
-                            #CRout.send(pickle.dumps(temp))#pipe error occuring??
+                        CtoR.send(pickle.dumps(temp))#pipe error occuring??
                             #pass
-                        temp.printPacket()
+                        #temp.printPacket()
                         #input from sender
                         pass
                     #add data to msg
@@ -109,6 +114,7 @@ def introduceErrors(packet, probability):
 
 def bitError(packet):
     """uses uniform distribution between 0 and 1. if this < 0.1 will increment dataLen by random num between 0-10"""
+    random.seed(555)
     if random.uniform(0,1) < 0.1:
         packet.dataLen += int(random.uniform(0,10))
 

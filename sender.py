@@ -41,6 +41,7 @@ def main():
             
             if piece == "":
                 break
+    inFile.close()
     print(message)
     
     exitFlag = False
@@ -65,8 +66,8 @@ def main():
             #prepare normal packet
             
         
-        
-        StoC.send(pickle.dumps(packetBuffer.pop(0)))
+        if(len(packetBuffer) != 0):
+            StoC.send(pickle.dumps(packetBuffer.pop(0)))
         
     Sin.close()
     StoC.close()     
