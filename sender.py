@@ -7,6 +7,10 @@ from packet import Packet
 
 
 def main():
+    SinPort = 0
+    SoutPort = 0
+    CSinport = 0
+    
     Sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CSout
     StoC = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CSin
     
@@ -18,46 +22,54 @@ def main():
     #StoC.connect()
     
     
-    pack = Packet(0x497E,0,0,0,"")
-    StoC.send(pickle.dumps(pack))
+    #testpack = Packet(0x497E,0,0,0,"")
     
     
-    Sin.close()
-    StoC.close()    
     
-    sys.exit()
+   
     
-    #pieceSize = 512
-    #message = []
-    #with open("in.txt", "rb") as inFile:
-        #while True:
-            #piece = inFile.read(pieceSize)
-            #message.append(piece)
+    print("test")
+    
+    pieceSize = 512
+    message = []
+    ####################"rb" on linux "r" on windows?????
+    with open("in.txt", "r") as inFile:
+        while True:
+            piece = inFile.read(pieceSize)
+            message.append(piece)
+            print(piece)
             
-            #if piece == "":
-                #break
-    #print(message)
+            if piece == "":
+                break
+    print(message)
     
-    #exitFlag = False
-    #nextt = 0
-    #packetBuffer = []
+    exitFlag = False
+    nextt = 0
+    packetBuffer = []
     
-    #while(not exitFlag):
-        #toSendMsg = message.get(nextt)
-        #lengthMsg = len(toSendMsg)
-        #if lengthMsg == 0:
-            #packet = packet(0x497E,0,nextt,0,"")
-            ##pickle
-            #packetBuffer.append(packet)
+    while(not exitFlag):
+        toSendMsg = message.pop(nextt)
+        lengthMsg = len(toSendMsg)
+        if lengthMsg == 0:
+            print("in if")
+            packet = Packet(0x497E,0,nextt,0,"")
+            #pickle
+            packetBuffer.append(packet)
+            exitFlag = True
             
-            #pass
-        #else:
-            #packet = packet(0x497E,0,nextt,lengthMsg,toSendMsg)
-            #packetBuffer.append(packet)
-            ##prepare normal packet
-            #pass
+            
+        else:
+            print("in else")
+            packet = Packet(0x497E,0,nextt,lengthMsg,toSendMsg)
+            packetBuffer.append(packet)
+            #prepare normal packet
+            
         
-    
+        
+        StoC.send(pickle.dumps(packetBuffer.pop(0)))
+        
+    Sin.close()
+    StoC.close()     
     
         ##new loop
         ##send out packet increase packet counter

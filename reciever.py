@@ -3,14 +3,25 @@ import sys, socket, packet, pickle
 
 
 def main():
-    Rin = socket.socket() #connetx to CRout
+    RinPort = 3000
+    RoutPort = 3001
+    CRinPort = 4000
+    Rin = socket.socket() #connects to CRout
     Rout = socket.socket() #connects to CRin
-    Rin.connect(("127.0.0.1",3001))
-    Rout.connect(("127.0.0.1",3000))
+    filename = "out.txt"
+    
+    Rin.connect(("127.0.0.1",RinPort))
+    Rout.connect(("127.0.0.1",CRinPort))
+    
+    
+    expected = 0
     
     data = Rin.recv(1024)
     while data:
-        temp = pickle.loads(data)
+        rcvd = pickle.loads(data)
+        if(rcvd.magnico == 0x497E and rcvd.typeField):
+            if(rcvd.seqno != expected):
+                ackPacket = P
         temp.printPacket()
         data = Rin.recv(1024)
                 
