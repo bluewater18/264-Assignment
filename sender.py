@@ -64,7 +64,7 @@ def main():
         
         if(len(packetBuffer) != 0):
             StoC.send(pickle.dumps(packetBuffer.pop(0)))
-            time.sleep(0.5)
+            time.sleep(0.5) #Works, but need a concrete value
         
     Sin.close()
     StoC.close()     

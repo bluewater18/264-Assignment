@@ -33,6 +33,9 @@ def main():
         rcvd = pickle.loads(data)
         rcvd.printPacket()
         writeDest.write(rcvd.data)
+        if(rcvd.typeField == 0):
+            print("Invalid packet - Break out of code")
+            break
         if(rcvd.magnico == 0x497E and rcvd.typeField):
             print("Recieved Packet")
             if(rcvd.seqno == expected):
