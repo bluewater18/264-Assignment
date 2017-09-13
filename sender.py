@@ -1,10 +1,8 @@
 import sys
 import socket
 import pickle
+import time
 from packet import Packet
-
-
-
 
 def main():
     SinPort = 0
@@ -57,8 +55,6 @@ def main():
             #pickle
             packetBuffer.append(packet)
             exitFlag = True
-            
-            
         else:
             print("in else")
             packet = Packet(0x497E,0,nextt,lengthMsg,toSendMsg)
@@ -68,6 +64,7 @@ def main():
         
         if(len(packetBuffer) != 0):
             StoC.send(pickle.dumps(packetBuffer.pop(0)))
+            time.sleep(0.5)
         
     Sin.close()
     StoC.close()     
