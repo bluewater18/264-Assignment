@@ -12,10 +12,12 @@ def main():
     Rin = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CRout
     #Rin = socket.socket()
     #Rin.setblocking(0)
-    Rin.bind(("127.0.0.1",5069))
+    '''Try except block in case the port is already binded'''
+    try:
+        Rin.bind(("127.0.0.1",5069))
     #Rout = socket.socket() #connects to CRin
-    
-    
+    except:
+        print("Port already binded")
     Rin.connect(("127.0.0.1",RinPort))
     #Rout.connect(("127.0.0.1",CRinPort))
     
@@ -34,7 +36,9 @@ def main():
         rcvd = pickle.loads(data)
         rcvd.printPacket()
         writeDest.write(rcvd.data)
-        #if(rcvd.magnico == 0x497E and rcvd.typeField):
+        if(rcvd.magnico == 0x497E and rcvd.typeField):
+            print("Recieved Packet")
+            ackPacket = Packet(0x497E,'acknowledgementPacket',rcvd.seqno,0,)
             #if(rcvd.seqno != expected):
                 #ackPacket = Packet()#send acknowledgement packet
             #else:
