@@ -51,6 +51,7 @@ def main():
     StoC = None
     RtoC = None
     CtoR = None
+    CtoS = None
     
     
     while inList:
@@ -63,13 +64,16 @@ def main():
                 inList.append(conn)
                 if (addr == ("127.0.0.1",SinPort)):
                     StoC = conn
-                    print("Set")
+                    print("StoC")
                 if (addr == ("127.0.0.1",RinPort)):
                     RtoC = conn
+                    print("RtoC")
                 if (addr == ("127.0.0.1", 5069)):
-                    print("CtoR")
                     CtoR = conn
-                #create holder for msg??
+                    print("CtoR")
+                if (addr == ("127.0.0.1", 5089)):
+                    CtoS = conn
+                    print("CtoS")
                 print("new connection from" + str(addr))
             #The afforementioned sockets [CRin, CRout, CSin, CSout] are no longer useable to distinguish after they have completed connection
             else:
@@ -79,18 +83,32 @@ def main():
                     #print(s)
                     #temp = pickle.loads(data)
                     #temp.printPacket()                    
-                    if s is CRin:
+                    if s == RtoC: #From Reciever
                         print("CRin")
-                        #input from Reciever
-                        pass
-                    if s == StoC:
-                        print("CSin")
-                        temp = pickle.loads(data)#error when packet is not send i.e. at the end
+                        temp = pickle.loads(data)
                         #if(not introduceErrors(data)):
-                        CtoR.send(pickle.dumps(temp))#pipe error occuring??
-                            #pass
+                        try:
+                            CtoS.send(pickle.dumps(temp))
+                        except:
+                            print("closed")
+                            for s in readable:
+                                s.close()
+                            return 0
+                        
+                        pass
+                    if s == StoC: #From Sender
+                        print("CSin")
+                        temp = pickle.loads(data)
+                        #if(not introduceErrors(data)):
+                        try:
+                            CtoR.send(pickle.dumps(temp))
+                        except:
+                            print("closed")
+                            for s in readable:
+                                s.close() 
+                            return 0
+                            
                         #temp.printPacket()
-                        #input from sender
                         pass
                     #add data to msg
                     if s not in outList:
