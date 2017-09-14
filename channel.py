@@ -1,4 +1,4 @@
-import sys, select, socket, pickle, packet
+import sys, select, socket, pickle, packet, random
 
 def makeSocket(portNum):
     channel_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,7 +19,7 @@ def main():
     CRoutPort = 3001
     SinPort = 7001
     RinPort = 7000
-    probability = 0.5
+    probability = 0.3
     
     
     #Socket Creation
@@ -86,27 +86,27 @@ def main():
                     if s == RtoC: #From Reciever
                         print("CRin")
                         temp = pickle.loads(data)
-                        #if(not introduceErrors(data)):
-                        try:
-                            CtoS.send(pickle.dumps(temp))
-                        except:
-                            print("closed")
-                            for s in readable:
-                                s.close()
-                            return 0
+                        if(not introduceErrors(data, probability)):
+                            try:
+                                CtoS.send(pickle.dumps(temp))
+                            except:
+                                print("closed")
+                                for s in readable:
+                                    s.close()
+                                return 0
                         
-                        pass
+                        
                     if s == StoC: #From Sender
                         print("CSin")
                         temp = pickle.loads(data)
-                        #if(not introduceErrors(data)):
-                        try:
-                            CtoR.send(pickle.dumps(temp))
-                        except:
-                            print("closed")
-                            for s in readable:
-                                s.close() 
-                            return 0
+                        if(not introduceErrors(data,probability)):
+                            try:
+                                CtoR.send(pickle.dumps(temp))
+                            except:
+                                print("closed")
+                                for s in readable:
+                                    s.close() 
+                                return 0
                             
                         #temp.printPacket()
                         pass

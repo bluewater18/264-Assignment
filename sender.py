@@ -10,6 +10,14 @@ class Error(Exception):
 class ackPacket(Error):
     pass
 
+class packetError(Error):
+    pass
+
+def checkPacket(packet):
+    if (packet.checksum != sum([packet.magnico,packet.typeField,packet.seqno,packet.dataLen])):
+        return False
+    return True
+
 def main():
     SinPort = 0
     SoutPort = 0
@@ -75,10 +83,13 @@ def main():
             (print("test2"))
             temp = packetBuffer.pop(0)
             i=0
-            while(i<5):
+            while(i<10):
                 print(i)
                 try:
                     data = Sin.recv(1024)
+                    recv = pickle.loads(data)
+                    if(not checkPacket(recv)):
+                        raise exception
                     if(pickle.loads(data).typeField == 0):
                         raise ackPacket
                 except EOFError:
@@ -88,13 +99,15 @@ def main():
                     StoC.close() 
                     return 0
                       
+                except packetError:
+                    pass
                 except ackPacket:
                     #runs when the packet is acknowledgement type
                     break;
                 except:
                     #handle not the right ackPacket
                     StoC.send(pickle.dumps(temp))
-                    time.sleep(0.5)
+                    time.sleep(0.02)
                     packetCount += 1
                     
                 #while(pickle.loads(data) != Packet(0x497E,0,rcvd.seqno,0,"") ):
