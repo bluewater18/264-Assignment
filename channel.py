@@ -1,4 +1,5 @@
-import sys, select, socket, pickle, packet
+import sys, select, socket, pickle, random
+from packet import Packet
 
 def makeSocket(portNum):
     channel_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,7 +20,7 @@ def main():
     CRoutPort = 3001
     SinPort = 7001
     RinPort = 7000
-    probability = 0.5
+    probability = 0.3
     
     
     #Socket Creation
@@ -51,6 +52,8 @@ def main():
     StoC = None
     RtoC = None
     CtoR = None
+    CtoS = None
+    connList = [StoC, RtoC, CtoR, CtoS]
     
     
     while inList:
@@ -63,13 +66,16 @@ def main():
                 inList.append(conn)
                 if (addr == ("127.0.0.1",SinPort)):
                     StoC = conn
-                    print("Set")
+                    print("StoC")
                 if (addr == ("127.0.0.1",RinPort)):
                     RtoC = conn
+                    print("RtoC")
                 if (addr == ("127.0.0.1", 5069)):
-                    print("CtoR")
                     CtoR = conn
-                #create holder for msg??
+                    print("CtoR")
+                if (addr == ("127.0.0.1", 5089)):
+                    CtoS = conn
+                    print("CtoS")
                 print("new connection from" + str(addr))
             #The afforementioned sockets [CRin, CRout, CSin, CSout] are no longer useable to distinguish after they have completed connection
             else:
@@ -79,18 +85,36 @@ def main():
                     #print(s)
                     #temp = pickle.loads(data)
                     #temp.printPacket()                    
-                    if s is CRin:
+                    if s == RtoC: #From Reciever
                         print("CRin")
-                        #input from Reciever
-                        pass
-                    if s == StoC:
+                        temp = pickle.loads(data)
+                        #if(not introduceErrors(data, probability)):
+                        try:
+                            CtoS.send(pickle.dumps(temp))
+                        except:
+                            print("closed")
+                            for s in readable:
+                                s.close()
+                            for conn in connList:
+                                conn.close()
+                            return 0
+                        
+                        
+                    if s == StoC: #From Sender
                         print("CSin")
-                        temp = pickle.loads(data)#error when packet is not send i.e. at the end
-                        #if(not introduceErrors(data)):
-                        CtoR.send(pickle.dumps(temp))#pipe error occuring??
-                            #pass
+                        temp = pickle.loads(data)
+                        if(not introduceErrors(temp,probability)):
+                            try:
+                                CtoR.send(pickle.dumps(temp))
+                            except:
+                                print("closed")
+                                for s in readable:
+                                    s.close() 
+                                for conn in connList:
+                                    conn.close()                                
+                                return 0
+                            
                         #temp.printPacket()
-                        #input from sender
                         pass
                     #add data to msg
                     if s not in outList:
@@ -106,7 +130,7 @@ def main():
 
 def introduceErrors(packet, probability):
     if random.uniform(0,1) < probability:
-        #to be implemented
+        print("packet dropped")
         return True
     else:
         bitError(packet)
@@ -114,23 +138,14 @@ def introduceErrors(packet, probability):
 
 def bitError(packet):
     """uses uniform distribution between 0 and 1. if this < 0.1 will increment dataLen by random num between 0-10"""
-    random.seed(555)
+    #random.seed(555)
     if random.uniform(0,1) < 0.1:
+        print("bit error introduced")
         packet.dataLen += int(random.uniform(0,10))
 
 
 
-#Packet dumping and writing unused ATM    
-def writePacket(_socket, packet):
-    f = _socket.makefile('wb', 1024 )
-    pickle.dump(packet, f, pickle.HIGHEST_PROTOCOL)
-    f.close()
 
-def readPacket(_socket):
-    f = _socket.makefile('rb', buffer_size )
-    data = pickle.load(f)
-    f.close()
-    return data
     
 
 
