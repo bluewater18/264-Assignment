@@ -36,6 +36,7 @@ def main():
     Sin.connect(("127.0.0.1",5001))
     
     Sin.setblocking(0)
+    StoC.setblocking(0)
     #StoC.connect()
     
     
@@ -83,16 +84,18 @@ def main():
             (print("test2"))
             temp = packetBuffer.pop(0)
             i=0
-            while(i<10):
+            while(i<5):
                 print(i)
+                i+=1
                 try:
                     data = Sin.recv(1024)
                     recv = pickle.loads(data)
                     if(not checkPacket(recv)):
-                        raise packetError
+                        raise
                     if(pickle.loads(data).typeField == 0):
                         raise ackPacket
                 except EOFError:
+                    
                     #Runs when the reciever has closed
                     print("transfer completed with packets: " + str(packetCount))
                     Sin.close()
@@ -102,10 +105,13 @@ def main():
                 except packetError:
                     print("packet error found")
                     print("############")
-                    raise exception
+                    
+                    
                 except ackPacket:
+                    print("acknowledgement packet recieved")
+                    i = 10
                     #runs when the packet is acknowledgement type
-                    break;
+                    
                 except:
                     #handle not the right ackPacket
                     StoC.send(pickle.dumps(temp))

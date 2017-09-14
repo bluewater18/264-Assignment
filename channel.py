@@ -88,15 +88,14 @@ def main():
                     if s == RtoC: #From Reciever
                         print("CRin")
                         temp = pickle.loads(data)
-                        #if(not introduceErrors(data, probability)):
-                        try:
-                            CtoS.send(pickle.dumps(temp))
-                        except:
-                            print("closed")
-                            for s in readable:
-                                s.close()
-                            for conn in connList:
-                                conn.close()
+                        if(not introduceErrors(temp, probability)):
+                            try:
+                                CtoS.send(pickle.dumps(temp))
+                            except:
+                                print("closed")
+                                for s in readable:
+                                    s.close()
+                            
                             return 0
                         
                         
@@ -110,8 +109,7 @@ def main():
                                 print("closed")
                                 for s in readable:
                                     s.close() 
-                                for conn in connList:
-                                    conn.close()                                
+                                                              
                                 return 0
                             
                         #temp.printPacket()
