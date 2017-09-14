@@ -40,7 +40,7 @@ def main():
     while data:
         rcvd = pickle.loads(data)
         rcvd.printPacket()
-        writeDest.write(rcvd.data)
+        
         if(rcvd.typeField == 0):#Final Packet from Sender
             print("Terminating Packet - Break out of code")
             print("packets sent :" + str(packetCount))
@@ -50,32 +50,39 @@ def main():
             print("Recieved Packet")
             
             #Need to check packet for error somewhere
-            
-            if(rcvd.seqno == expected):
-                ackPacket = Packet(0x497E,0,rcvd.seqno,0,"")
-                try:
-                    data = Sin.recv(1024)
-                    if(not checkPacket(rcvd)):
-                        raise exception
-                    
-                except:    
-                #while(not data):
-                    print("Sending")
-                    packetCount += 1
-                    Rout.send(pickle.dumps(ackPacket))#send acknowledgement packet
-                    time.sleep(0.02)#Wait for next packet
-                    data = Rin.recv(1024)#load the next datasegment
-                
-            else:
+            if(checkPacket(rcvd)):
+                #Packet is good
                 writeDest.write(rcvd.data)
-                print("Invalid packet")
-                break
+                
+                if(rcvd.seqno == expected):
+                    ackPacket = Packet(0x497E,0,rcvd.seqno,0,"")
+                    try:
+                        data = Sin.recv(1024)
+                        
+                        
+                        
+                    except:   
+                        print("error")
+                        #while(not data):
+                        print("Sending")
+                        packetCount += 1
+                        Rout.send(pickle.dumps(ackPacket))#send acknowledgement packet
+                        time.sleep(0.2)#Wait for next packet
+                        data = Rin.recv(1024)#load the next datasegment
+                        
+                else:
+                    writeDest.write(rcvd.data)
+                    print("Invalid packet")
+                    break
+            else:
+                data = Rin.recv(1024)
         
                 
         
     writeDest.close()
     Rin.close()
     Rout.close()
+    print("cleaned up")
     
     
 main()

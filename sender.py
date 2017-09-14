@@ -89,7 +89,7 @@ def main():
                     data = Sin.recv(1024)
                     recv = pickle.loads(data)
                     if(not checkPacket(recv)):
-                        raise exception
+                        raise packetError
                     if(pickle.loads(data).typeField == 0):
                         raise ackPacket
                 except EOFError:
@@ -100,14 +100,16 @@ def main():
                     return 0
                       
                 except packetError:
-                    pass
+                    print("packet error found")
+                    print("############")
+                    raise exception
                 except ackPacket:
                     #runs when the packet is acknowledgement type
                     break;
                 except:
                     #handle not the right ackPacket
                     StoC.send(pickle.dumps(temp))
-                    time.sleep(0.02)
+                    time.sleep(0.2)
                     packetCount += 1
                     
                 #while(pickle.loads(data) != Packet(0x497E,0,rcvd.seqno,0,"") ):
