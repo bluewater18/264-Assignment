@@ -98,6 +98,8 @@ def main():
                         j=100
                     time.sleep(0.2)
             
+        except EOFError:
+            time.sleep(0.2)
             
         except:
             print("in except")

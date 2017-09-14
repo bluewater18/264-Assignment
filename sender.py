@@ -94,13 +94,13 @@ def main():
                         raise
                     if(pickle.loads(data).typeField == 0):
                         raise ackPacket
-                except EOFError:
+                #except EOFError:
                     
-                    #Runs when the reciever has closed
-                    print("transfer completed with packets: " + str(packetCount))
-                    Sin.close()
-                    StoC.close() 
-                    return 0
+                    ##Runs when the reciever has closed
+                    #print("transfer completed with packets: " + str(packetCount))
+                    #Sin.close()
+                    #StoC.close() 
+                    #return 0
                       
                 except packetError:
                     print("packet error found")
@@ -110,6 +110,7 @@ def main():
                 except ackPacket:
                     print("acknowledgement packet recieved")
                     i = 10
+                    data = Sin.recv(1024)
                     #runs when the packet is acknowledgement type
                     
                 except:
@@ -122,7 +123,8 @@ def main():
                     #packetCount+= 1
                     #StoC.send(pickle.dumps(packetBuffer.pop(0)))
                     #time.sleep(0.2) #Works, but need a concrete value                
-                
+               
+    print("transfer completed with packets: " + str(packetCount))            
     Sin.close()
     StoC.close()     
     
