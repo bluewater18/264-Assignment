@@ -50,7 +50,7 @@ def main():
     pieceSize = 512
     message = []
     ####################"rb" on linux "r" on windows?????
-    with open("in1.txt", "r") as inFile:
+    with open("in.txt", "r") as inFile:
         while True:
             piece = inFile.read(pieceSize)
             message.append(piece)
@@ -82,9 +82,7 @@ def main():
         if(len(packetBuffer) != 0):
             (print("test2"))
             temp = packetBuffer.pop(0)
-            i=0
-            while(i<10):
-                print(i)
+            while(True):
                 try:
                     data = Sin.recv(1024)
                     recv = pickle.loads(data)

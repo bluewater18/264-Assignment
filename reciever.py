@@ -56,19 +56,19 @@ def main():
                 
                 if(rcvd.seqno == expected):
                     ackPacket = Packet(0x497E,0,rcvd.seqno,0,"")
-                    try:
-                        data = Sin.recv(1024)
+                    #try:
+                        #data = Sin.recv(1024)
                         
                         
                         
-                    except:   
-                        print("error")
-                        #while(not data):
-                        print("Sending")
-                        packetCount += 1
-                        Rout.send(pickle.dumps(ackPacket))#send acknowledgement packet
-                        time.sleep(0.1)#Wait for next packet
-                        data = Rin.recv(1024)#load the next datasegment
+                    #except:   
+                    print("error")
+                    #while(not data):
+                    print("Sending")
+                    packetCount += 1
+                    Rout.send(pickle.dumps(ackPacket))#send acknowledgement packet
+                    time.sleep(0.1)#Wait for next packet
+                    data = Rin.recv(1024)#load the next datasegment
                         
                 else:
                     #writeDest.write(rcvd.data)
