@@ -1,7 +1,4 @@
-import sys
-import socket
-import pickle
-import time
+import sys, socket, pickle, time, os
 from packet import Packet
 
 def checkPacket(packet):
@@ -9,40 +6,92 @@ def checkPacket(packet):
         return False
     return True
 
+def checkPort(port):
+    if(port>1024 and port < 64000):
+        return True
+    return False
+
+Sin = None
+Sout = None
+
+def freeSockets():
+    try:
+        Sin.shutdown(socket.SHUT_RDWR)
+        Sout.shutdown(socket.SHUT_RDWR)
+        Sin.close()
+        Sout.close()   
+    except:
+        pass
+    
 def main():
-    SinPort = 0
-    SoutPort = 0
-    CSinport = 0
+    
+    if (len(sys.argv) != 5):
+        print("Not all arguments entered")
+        return 0
+    try:
+        for x in range(1,4):
+            sys.argv[x] = int(sys.argv[x])
+    except:
+        print("arguments not correctly formatted")
+        
+    for port in sys.argv[1:4]:
+        if(not checkPort(port)):
+            print("Ports must be in range 1024 - 64000")
+            return 0  
+        
+    
+    SinPort = sys.argv[1]
+    SoutPort = sys.argv[2]
+    CSinPort = sys.argv[3]
+    filename = sys.argv[4]
+    
+    if(not os.path.isfile("./"+filename)):
+        print("File Does Not Exist")
+        return 0     
+    
     packetCount = 0
-    
-    Sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CSout
-    Sin.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    StoC = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CSin
-    StoC.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    
+    try:
+        Sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CSout
+        Sin.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        StoC = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CSin
+        StoC.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    except:
+        print("Error Making Ports")
+        freeSockets()
+        return 0
    
-    
-    StoC.bind(("127.0.0.1",7001))
-    StoC.connect(("127.0.0.1",5000))
-    
-    Sin.bind(("127.0.0.1",5089))
-    Sin.connect(("127.0.0.1",5001))
+    try:
+        StoC.bind(("127.0.0.1",7001))    
+        Sin.bind(("127.0.0.1",SinPort))
+    except:
+        print("Error Binding ports")
+        freeSockets()
+        return 0
+        
+    try:
+        StoC.connect(("127.0.0.1",SoutPort))
+        Sin.connect(("127.0.0.1",CSinPort))
+    except:
+        print("Error Connecting Ports")
+        freeSockets()
+        return 0
     
     Sin.setblocking(0)
     
     pieceSize = 512
     message = []
-    with open("in.txt", "r") as inFile:
+    
+    
+    with open(filename, "r") as inFile:
         while True:
             piece = inFile.read(pieceSize)
             message.append(piece)
-            print(piece)
+            
             
             if piece == "":
                 break
     inFile.close()
-    print(message)
-    #testfile = open("test.txt","w")
+    
     
     exitFlag = False
     nextt = 0
@@ -56,35 +105,27 @@ def main():
             packetBuffer.append(packet)
             exitFlag = True
         else:
-            print("in else")
             packet = Packet(0x497E,1,nextt,lengthMsg,toSendMsg)
             packetBuffer.append(packet)
 
             
         
         if(len(packetBuffer) != 0):
-            (print("test2"))
             temp = packetBuffer.pop(0)
             while(True):
                 try:
                     data = Sin.recv(1024)
                     recv = pickle.loads(data)
-                    print("current Packet")
-                    print(str(recv.dataLen))
-                    print("****")
                     if(not checkPacket(recv)):
                         raise packetError
         
                     if(recv.typeField == 0):
-                        print("ak Packet")
+                        #acknowledgement package recieved
                         break  
                 except EOFError:
                     #Runs when the reciever has closed
                     print("transfer completed with packets: " + str(packetCount))
-                    shutdown(Sin)
-                    shutdown(StoC)                    
-                    Sin.close()
-                    StoC.close() 
+                    freeSockets()
                     return 0
                 
                 except:
@@ -94,10 +135,8 @@ def main():
                     packetCount += 1
                     
                 finally:
-                    time.sleep(0.1)            
-    Sins.shutdown(socket.SHUT_RDWR)
-    StoCs.shutdown(socket.SHUT_RDWR)
-    Sin.close()
-    StoC.close()     
+                    time.sleep(0.1)  
+                    
+    freeSockets()   
     
 main()
