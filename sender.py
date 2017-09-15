@@ -50,7 +50,7 @@ def main():
     pieceSize = 512
     message = []
     ####################"rb" on linux "r" on windows?????
-    with open("in.txt", "r") as inFile:
+    with open("in1.txt", "r") as inFile:
         while True:
             piece = inFile.read(pieceSize)
             message.append(piece)
@@ -88,10 +88,15 @@ def main():
                 try:
                     data = Sin.recv(1024)
                     recv = pickle.loads(data)
+                    print("current Packet")
+                    print(str(recv.dataLen))
+                    print("****")
                     if(not checkPacket(recv)):
                         raise packetError
-                    if(pickle.loads(data).typeField == 0):
-                        raise ackPacket
+        
+                    if(recv.typeField == 0):
+                        print("ak Packet")
+                        break  
                 except EOFError:
                     #Runs when the reciever has closed
                     print("transfer completed with packets: " + str(packetCount))
@@ -99,19 +104,21 @@ def main():
                     StoC.close() 
                     return 0
                       
-                except packetError:
-                    print("packet error found")
-                    print("############")
-                    raise exception
+                #except packetError:
+                    #print("packet error found")
+                    #print("############")
+                    #raise 
                 except ackPacket:
                     #runs when the packet is acknowledgement type
-                    break;
+                    break
                 except:
                     #handle not the right ackPacket
                     StoC.send(pickle.dumps(temp))
-                    time.sleep(0.2)
+                    
                     packetCount += 1
                     
+                finally:
+                    time.sleep(0.1)
                 #while(pickle.loads(data) != Packet(0x497E,0,rcvd.seqno,0,"") ):
                     #packetCount+= 1
                     #StoC.send(pickle.dumps(packetBuffer.pop(0)))

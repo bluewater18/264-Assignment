@@ -67,11 +67,11 @@ def main():
                         print("Sending")
                         packetCount += 1
                         Rout.send(pickle.dumps(ackPacket))#send acknowledgement packet
-                        time.sleep(0.2)#Wait for next packet
+                        time.sleep(0.1)#Wait for next packet
                         data = Rin.recv(1024)#load the next datasegment
                         
                 else:
-                    writeDest.write(rcvd.data)
+                    #writeDest.write(rcvd.data)
                     print("Invalid packet")
                     break
             else:
