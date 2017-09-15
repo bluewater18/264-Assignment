@@ -13,7 +13,7 @@ def main():
     CRoutPort = 3001
     SinPort = 7001
     RinPort = 7000
-    probability = 0.1
+    probability = 0.05
     
     
     #Socket Creation
