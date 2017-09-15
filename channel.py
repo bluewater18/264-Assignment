@@ -111,7 +111,10 @@ def main():
                                 for s in readable:
                                     s.close() 
                                 for conn in connList:
-                                    conn.close()                                
+                                    try:
+                                        conn.close()                                
+                                    except:
+                                        2
                                 return 0
                             
                         #temp.printPacket()
