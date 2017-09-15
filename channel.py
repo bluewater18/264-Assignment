@@ -1,14 +1,7 @@
 import sys, select, socket, pickle, random
 from packet import Packet
 
-def makeSocket(portNum):
-    channel_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #channel_socket.setblocking(0)
-    #channel_socket .setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    channel_socket.bind(("127.0.0.1", portNum))
-    channel_socket.listen(1)
-    
-    return channel_socket
+\
 
 
 def main():
@@ -20,27 +13,32 @@ def main():
     CRoutPort = 3001
     SinPort = 7001
     RinPort = 7000
-    probability = 0.3
+    probability = 0.1
     
     
     #Socket Creation
     CRin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    CRin.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     CRin.setblocking(0)
+    
     CRin.bind(("127.0.0.1",CRinPort))
     CRin.listen(1)
     
     CRout = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    CRout.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     CRout.setblocking(0)
     CRout.bind(("127.0.0.1",CRoutPort))
     CRout.listen(1) 
     
     
     CSin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    CSin.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     CSin.setblocking(0)
     CSin.bind(("127.0.0.1",CSinPort))
     CSin.listen(1) 
     
     CSout = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    CSout.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     CSout.setblocking(0)
     CSout.bind(("127.0.0.1",CSoutPort))
     CSout.listen(1)     
@@ -95,14 +93,11 @@ def main():
                                     print("Ctos")
                                 except:
                                     print("closed")
-                                    for s in readable:
+                                    for s in readable + writeable + exceptional:
+                                        s.shutdown(socket.SHUT_RDWR)
                                         s.close()
-                                    for conn in connList:
-                                        conn.close()
-                                    return 0
                         except:
                             pass
-                        
                         
                     if s == StoC: #From Sender
                         print("CSin")
@@ -112,13 +107,10 @@ def main():
                                 CtoR.send(pickle.dumps(temp))
                             except:
                                 print("closed")
-                                for s in readable:
+                                for s in readable + writeable + exceptional:
+                                    s.shutdown(socket.SHUT_RDWR)
                                     s.close() 
-                                for conn in connList:
-                                    try:
-                                        conn.close()                                
-                                    except:
-                                        2
+                                                                
                                 return 0
                             
                         #temp.printPacket()

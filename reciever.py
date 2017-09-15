@@ -15,7 +15,9 @@ def main():
     packetCount = 0
     
     Rin = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CRout
+    Rin.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     Rout = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CRin
+    Rout.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     #Rin = socket.socket()
     #Rin.setblocking(0)
     '''Try except block in case the port is already binded'''
@@ -56,14 +58,9 @@ def main():
                 
                 if(rcvd.seqno == expected):
                     ackPacket = Packet(0x497E,0,rcvd.seqno,0,"")
-                    #try:
-                        #data = Sin.recv(1024)
+
                         
-                        
-                        
-                    #except:   
-                    print("error")
-                    #while(not data):
+
                     print("Sending")
                     packetCount += 1
                     Rout.send(pickle.dumps(ackPacket))#send acknowledgement packet
@@ -71,7 +68,7 @@ def main():
                     data = Rin.recv(1024)#load the next datasegment
                         
                 else:
-                    #writeDest.write(rcvd.data)
+
                     print("Invalid packet")
                     break
             else:
@@ -80,6 +77,8 @@ def main():
                 
         
     writeDest.close()
+    Rin.shutdown(socket.SHUT_RDWR)
+    Rout.shutdown(socket.SHUT_RDWR)
     Rin.close()
     Rout.close()
     print("cleaned up")

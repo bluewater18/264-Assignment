@@ -4,15 +4,6 @@ import pickle
 import time
 from packet import Packet
 
-class Error(Exception):
-    pass
-
-class ackPacket(Error):
-    pass
-
-class packetError(Error):
-    pass
-
 def checkPacket(packet):
     if (packet.checksum != sum([packet.magnico,packet.typeField,packet.seqno,packet.dataLen])):
         return False
@@ -25,7 +16,9 @@ def main():
     packetCount = 0
     
     Sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CSout
+    Sin.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     StoC = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #connects to CSin
+    StoC.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
    
     
@@ -36,20 +29,9 @@ def main():
     Sin.connect(("127.0.0.1",5001))
     
     Sin.setblocking(0)
-    #StoC.connect()
-    
-    
-    #testpack = Packet(0x497E,0,0,0,"")
-    
-    
-    
-   
-    
-    print("test")
     
     pieceSize = 512
     message = []
-    ####################"rb" on linux "r" on windows?????
     with open("in.txt", "r") as inFile:
         while True:
             piece = inFile.read(pieceSize)
@@ -60,6 +42,7 @@ def main():
                 break
     inFile.close()
     print(message)
+    #testfile = open("test.txt","w")
     
     exitFlag = False
     nextt = 0
@@ -76,7 +59,7 @@ def main():
             print("in else")
             packet = Packet(0x497E,1,nextt,lengthMsg,toSendMsg)
             packetBuffer.append(packet)
-            #prepare normal packet
+
             
         
         if(len(packetBuffer) != 0):
@@ -98,17 +81,12 @@ def main():
                 except EOFError:
                     #Runs when the reciever has closed
                     print("transfer completed with packets: " + str(packetCount))
+                    shutdown(Sin)
+                    shutdown(StoC)                    
                     Sin.close()
                     StoC.close() 
                     return 0
-                      
-                #except packetError:
-                    #print("packet error found")
-                    #print("############")
-                    #raise 
-                except ackPacket:
-                    #runs when the packet is acknowledgement type
-                    break
+                
                 except:
                     #handle not the right ackPacket
                     StoC.send(pickle.dumps(temp))
@@ -116,20 +94,10 @@ def main():
                     packetCount += 1
                     
                 finally:
-                    time.sleep(0.1)
-                #while(pickle.loads(data) != Packet(0x497E,0,rcvd.seqno,0,"") ):
-                    #packetCount+= 1
-                    #StoC.send(pickle.dumps(packetBuffer.pop(0)))
-                    #time.sleep(0.2) #Works, but need a concrete value                
-                
+                    time.sleep(0.1)            
+    Sins.shutdown(socket.SHUT_RDWR)
+    StoCs.shutdown(socket.SHUT_RDWR)
     Sin.close()
     StoC.close()     
-    
-        ##new loop
-        ##send out packet increase packet counter
-        ##wait for response
-        ##if response complete checks
-        ##if checks pass increment next go to outerloop
-        ##else restart loop
     
 main()
