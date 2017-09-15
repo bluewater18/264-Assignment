@@ -1,7 +1,7 @@
 import sys, select, socket, pickle, random
 from packet import Packet
 
-\
+
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
     CRoutPort = 3001
     SinPort = 7001
     RinPort = 7000
-    probability = 0.05
+    probability = 0.0
     
     
     #Socket Creation
